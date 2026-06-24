@@ -346,18 +346,23 @@ class AudioTester(Gtk.Window):
         self._updating_apps = False
 
         css_sel = b"""
+        #dev-list row {
+            padding: 0;
+        }
         #dev-list row:selected {
             background: transparent;
         }
-        #dev-list row:selected .selected-sink {
-            border: 2px solid #22c55e;
-            border-radius: 5px;
-            background: rgba(34, 197, 94, 0.1);
-        }
         .selected-sink {
-            border: 2px solid #22c55e;
-            border-radius: 5px;
-            background: rgba(34, 197, 94, 0.1);
+            background: rgba(34, 197, 94, 0.08);
+            border-left: 5px solid #22c55e;
+            padding-left: 2px;
+        }
+        .default-sink {
+            border-left: 5px solid #16a34a;
+            font-weight: bold;
+        }
+        .default-sink.selected-sink {
+            border-left: 5px solid #15803d;
         }
         """
         sp_sel = Gtk.CssProvider()
@@ -449,6 +454,7 @@ class AudioTester(Gtk.Window):
         self.refresh_sinks()
         self.refresh_apps()
         self.run_health_check()
+        GLib.idle_add(self._select_default_sink)
 
         self._refresh_apps_timer = None
         GLib.timeout_add_seconds(2, self._auto_refresh)
@@ -499,6 +505,22 @@ class AudioTester(Gtk.Window):
 
         self.dev_listbox.show_all()
         self._update_vol_ui()
+
+    def _select_default_sink(self):
+        default = get_default_sink()
+        if default:
+            for row in self.dev_listbox.get_children():
+                if hasattr(row, 'name') and row.name == default:
+                    self.dev_listbox.select_row(row)
+                    self._select_dev(default)
+                    return
+        elif self.sinks:
+            sid, name, desc = self.sinks[0]
+            for row in self.dev_listbox.get_children():
+                if hasattr(row, 'name') and row.name == name:
+                    self.dev_listbox.select_row(row)
+                    self._select_dev(name)
+                    return
 
     def refresh_sinks(self):
         self.sinks = get_sinks()

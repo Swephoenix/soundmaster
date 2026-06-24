@@ -344,6 +344,7 @@ class AudioTester(Gtk.Window):
         self._vol_debounce = None
         self._si_debounce = {}
         self._updating_apps = False
+        self._prev_selected = None
 
         css_sel = b"""
         #dev-list row {
@@ -626,13 +627,14 @@ class AudioTester(Gtk.Window):
             self._select_dev(row.name)
 
     def _select_dev(self, name):
+        if hasattr(self, '_prev_selected') and self._prev_selected:
+            self._prev_selected.get_style_context().remove_class("selected-sink")
         self.current_sink = name
         for row in self.dev_listbox.get_children():
-            ctx = row.get_style_context()
             if hasattr(row, 'name') and row.name == name:
-                ctx.add_class("selected-sink")
-            else:
-                ctx.remove_class("selected-sink")
+                row.get_style_context().add_class("selected-sink")
+                self._prev_selected = row
+                break
         self._update_vol_ui()
 
     def _update_vol_ui(self):

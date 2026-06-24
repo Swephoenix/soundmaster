@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Soundmaster
+Comment=Audio device and app stream volume control
+Exec=soundmaster.py
+Icon=testa-ljudet
+Terminal=false
+Type=Application
+Categories=Utility;Audio;

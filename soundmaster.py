@@ -346,8 +346,19 @@ class AudioTester(Gtk.Window):
         self._updating_apps = False
 
         css_sel = b"""
-        .selected-sink { border: 2px solid #3b82f6; border-radius: 4px; }
-        .selected-sink { background: #eff6ff; }
+        #dev-list row:selected {
+            background: transparent;
+        }
+        #dev-list row:selected .selected-sink {
+            border: 2px solid #22c55e;
+            border-radius: 5px;
+            background: rgba(34, 197, 94, 0.1);
+        }
+        .selected-sink {
+            border: 2px solid #22c55e;
+            border-radius: 5px;
+            background: rgba(34, 197, 94, 0.1);
+        }
         """
         sp_sel = Gtk.CssProvider()
         sp_sel.load_from_data(css_sel)
@@ -387,7 +398,8 @@ class AudioTester(Gtk.Window):
         sc_dev.set_min_content_height(140)
         self.dev_listbox = Gtk.ListBox()
         self.dev_listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-        self.dev_listbox.connect("row-activated", self._on_dev_activated)
+        self.dev_listbox.set_name("dev-list")
+        self.dev_listbox.connect("row-selected", self._on_dev_selected)
         sc_dev.add(self.dev_listbox)
         left.pack_start(sc_dev, True, True, 0)
 
@@ -580,12 +592,13 @@ class AudioTester(Gtk.Window):
         save_favorites(self.favorites)
         self._build_dev_list()
 
-    def _on_dev_activated(self, _box, row):
-        if hasattr(row, 'name'):
+    def _on_dev_selected(self, _box, row):
+        if row is not None and hasattr(row, 'name'):
             self._select_dev(row.name)
 
     def _on_dev_select(self, row):
-        self._select_dev(row.name)
+        if row.name != self.current_sink:
+            self._select_dev(row.name)
 
     def _select_dev(self, name):
         self.current_sink = name

@@ -362,11 +362,7 @@ class AudioTester(Gtk.Window):
             padding-left: 2px;
         }
         .default-sink {
-            border-left: 5px solid #16a34a;
-            font-weight: bold;
-        }
-        .default-sink.selected-sink {
-            border-left: 5px solid #15803d;
+            background: rgba(100, 116, 139, 0.06);
         }
         """
         sp_sel = Gtk.CssProvider()

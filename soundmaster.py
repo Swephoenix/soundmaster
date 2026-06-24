@@ -345,6 +345,17 @@ class AudioTester(Gtk.Window):
         self._si_debounce = {}
         self._updating_apps = False
 
+        css_sel = b"""
+        .selected-sink { border: 2px solid #3b82f6; border-radius: 4px; }
+        .selected-sink { background: #eff6ff; }
+        """
+        sp_sel = Gtk.CssProvider()
+        sp_sel.load_from_data(css_sel)
+        Gtk.StyleContext.add_provider_for_screen(
+            self.get_screen(), sp_sel,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION + 1
+        )
+
         hb = Gtk.HeaderBar(title="Testa ljudet")
         hb.set_show_close_button(True)
         hb.set_subtitle("Ljudutgångar och program")
@@ -446,6 +457,8 @@ class AudioTester(Gtk.Window):
             row.set_name(name)
             if name == default:
                 row.get_style_context().add_class("default-sink")
+            if name == self.current_sink:
+                row.get_style_context().add_class("selected-sink")
             self.dev_listbox.add(row)
 
         for s, n, d in starred:
@@ -576,6 +589,12 @@ class AudioTester(Gtk.Window):
 
     def _select_dev(self, name):
         self.current_sink = name
+        for row in self.dev_listbox.get_children():
+            ctx = row.get_style_context()
+            if hasattr(row, 'name') and row.name == name:
+                ctx.add_class("selected-sink")
+            else:
+                ctx.remove_class("selected-sink")
         self._update_vol_ui()
 
     def _update_vol_ui(self):

@@ -507,6 +507,7 @@ class AudioTester(Gtk.Window):
             row.set_sensitive(False)
             self.dev_listbox.add(row)
 
+        self._prev_selected = None
         self.dev_listbox.show_all()
         self._update_vol_ui()
 
@@ -627,14 +628,18 @@ class AudioTester(Gtk.Window):
             self._select_dev(row.name)
 
     def _select_dev(self, name):
-        if hasattr(self, '_prev_selected') and self._prev_selected:
-            self._prev_selected.get_style_context().remove_class("selected-sink")
-        self.current_sink = name
+        found = None
         for row in self.dev_listbox.get_children():
-            if hasattr(row, 'name') and row.name == name:
+            if not hasattr(row, 'name'):
+                continue
+            if row.name == name:
                 row.get_style_context().add_class("selected-sink")
-                self._prev_selected = row
-                break
+                found = row
+            else:
+                row.get_style_context().remove_class("selected-sink")
+        if found:
+            self.current_sink = name
+            self._prev_selected = found
         self._update_vol_ui()
 
     def _update_vol_ui(self):

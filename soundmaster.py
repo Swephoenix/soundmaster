@@ -349,8 +349,11 @@ class AudioTester(Gtk.Window):
         #dev-list row {
             padding: 0;
         }
-        #dev-list row:selected {
+        #dev-list row:selected,
+        #dev-list row:selected label,
+        #dev-list row:selected * {
             background: transparent;
+            color: #000000;
         }
         .selected-sink {
             background: rgba(34, 197, 94, 0.08);

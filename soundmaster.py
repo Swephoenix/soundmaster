@@ -269,8 +269,8 @@ class AppStreamRow(Gtk.ListBoxRow):
         box.pack_start(icon_box, False, False, 0)
 
         self.scale = Gtk.Scale(orientation=Gtk.Orientation.HORIZONTAL)
-        self.scale.set_range(0, 150)
-        self.scale.set_value(vol_pct)
+        self.scale.set_range(0, 100)
+        self.scale.set_value(min(vol_pct, 100))
         self.scale.set_digits(0)
         self.scale.set_hexpand(True)
         self.scale.set_size_request(100, -1)
@@ -309,7 +309,7 @@ class AppStreamRow(Gtk.ListBoxRow):
 
     def _apply_vol(self, pct):
         self._debounce_timer = None
-        self.on_debounce(self.idx, pct, None)
+        self.on_debounce(self.idx, min(pct, 100), None)
         return False
 
     def _on_mute(self, btn):
@@ -318,7 +318,7 @@ class AppStreamRow(Gtk.ListBoxRow):
     def update_values(self, vol_pct, muted):
         self._updating = True
         if vol_pct is not None:
-            self.scale.set_value(vol_pct)
+            self.scale.set_value(min(vol_pct, 100))
         if muted is not None:
             self.mute_btn.set_active(muted)
         self._updating = False

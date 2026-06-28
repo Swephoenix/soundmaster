@@ -206,7 +206,8 @@ def app_color(name):
 
 
 class SinkRow(Gtk.ListBoxRow):
-    def __init__(self, sid, name, desc, is_fav, on_star_toggle, on_select):
+    def __init__(self, sid, name, desc, is_fav, on_star_toggle, on_select,
+                 is_checked=False, on_check_click=None):
         super().__init__()
         self.sid = sid
         self.name = name
@@ -229,6 +230,16 @@ class SinkRow(Gtk.ListBoxRow):
         lbl.set_ellipsize(Pango.EllipsizeMode.END)
         box.pack_start(self.star_btn, False, False, 0)
         box.pack_start(lbl, True, True, 0)
+
+        self.check_btn = Gtk.Button(label="\u2713" if is_checked else "\u25CB")
+        self.check_btn.set_size_request(36, 28)
+        ctx = self.check_btn.get_style_context()
+        if is_checked:
+            ctx.add_class("suggested-action")
+        self.check_btn.set_tooltip_text("V\u00e4lj f\u00f6r uppspelning")
+        self.check_btn.connect("clicked", lambda btn: on_check_click(self) if on_check_click else None)
+        box.pack_end(self.check_btn, False, False, 0)
+
         self.add(box)
         self.connect("activate", lambda _: on_select(self))
 
@@ -471,7 +482,9 @@ class AudioTester(Gtk.Window):
 
         def add_row(sid, name, desc):
             row = SinkRow(sid, name, desc, name in self.favorites,
-                          self._on_star_toggle, self._on_dev_select)
+                          self._on_star_toggle, self._on_dev_select,
+                          is_checked=(name == self.current_sink),
+                          on_check_click=self._on_check_select)
             row.set_name(name)
             if name == default:
                 row.get_style_context().add_class("default-sink")
@@ -691,6 +704,21 @@ class AudioTester(Gtk.Window):
             self.health_label.set_markup("<b>Ljudsystem:</b> Problem")
             text = "\n".join(f"  \u2022 {i}" for i in issues)
             self.status_label.set_markup(f'<span foreground="red">Problem:\n{text}</span>')
+
+    def _on_check_select(self, row):
+        name = row.name
+        if not name or name == self.current_sink:
+            return
+        self._select_dev(name)
+        try:
+            subprocess.run(["pactl", "set-default-sink", name], timeout=5)
+            self.status_label.set_markup(
+                f'<span foreground="green">Standard: {row.desc}</span>'
+            )
+        except Exception as e:
+            self.status_label.set_markup(
+                f'<span foreground="red">Misslyckades: {e}</span>'
+            )
 
     def on_set_default(self, _btn=None):
         name = self.current_sink

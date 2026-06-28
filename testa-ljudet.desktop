@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Soundmaster
 Comment=Audio device and app stream volume control
-Exec=soundmaster.py
+Exec=/home/baronj/soundmaster/soundmaster.py
 Icon=testa-ljudet
 Terminal=false
 Type=Application
